@@ -38,6 +38,8 @@
 import json
 import os
 import asyncio
+import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from rubka import Robot
 from rubka.context import Message
@@ -46,12 +48,36 @@ from rubka.button import InlineBuilder
 # ---------------- تنظیمات ----------------
 TOKEN = "BJDJCJ0SKJTSQEOIKLHSTSJCRCPXDNOFQMHOEXWSIWCRWGHASNBIFXRPOGAPSSPD"
 ADMIN_IDS = {"u0IHmfJ0b883007320baa7c0e61fd7b0"}
-CHANNEL_GUID = "c0DtKHY044d402c86990d06d74fc288b"
-CHANNEL_LINK = "https://rubika.ir/film_nabbbbbb"
+CHANNEL_GUID = ""
+CHANNEL_LINK = ""
 DELETE_AFTER_SECONDS = 10
 DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "items.json")
 
 bot = Robot(TOKEN)
+
+
+# ---------------- وب‌سرور مجازی برای پلن رایگان Render (Web Service) ----------------
+# Render فقط به سرویس‌هایی که روی یه پورت HTTP گوش می‌دن پلن رایگان می‌ده.
+# این وب‌سرور فقط جواب هلث‌چک رو می‌ده؛ کار اصلی بات همچنان polling روبیکاست.
+class _HealthCheckHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-type", "text/plain; charset=utf-8")
+        self.end_headers()
+        self.wfile.write("ربات روبیکا در حال اجراست ✅".encode("utf-8"))
+
+    def log_message(self, format, *args):
+        pass  # لاگ‌های اضافه‌ی HTTP رو خاموش می‌کنیم
+
+
+def _start_health_server():
+    port = int(os.environ.get("PORT", 10000))
+    server = HTTPServer(("0.0.0.0", port), _HealthCheckHandler)
+    print(f"وب‌سرور هلث‌چک روی پورت {port} بالا اومد.")
+    server.serve_forever()
+
+
+threading.Thread(target=_start_health_server, daemon=True).start()
 
 # --- هندلر موقت برای عیب‌یابی: هر پیام دریافتی رو توی کنسول چاپ می‌کنه ---
 # بعد از اینکه مطمئن شدی همه‌چیز درست کار می‌کنه، می‌تونی این بخش رو حذف کنی
