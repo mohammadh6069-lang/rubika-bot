@@ -1,0 +1,14 @@
+{
+  "text1": {
+    "type": "text",
+    "content": "سلام",
+    "caption": ""
+  },
+  "500": {
+    "type": "file",
+    "content": {
+      "chat_id": "b0IHmfJ0rHK0dc7cfbb5279822f686e9",
+      "message_id": "1831423115654947318"
+    }
+  }
+}
