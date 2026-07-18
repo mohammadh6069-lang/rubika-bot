@@ -1,3 +1,4 @@
 rubka
 requests
 pg8000
+Pillow
